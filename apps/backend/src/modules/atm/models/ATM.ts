@@ -54,7 +54,7 @@ export class ATM {
     const card1: Card = {
       cardNumber: "123456789",
       pinHash: "1234",
-      cardHolderName: "Shiva Ram",
+      cardHolderName: "Shiva",
       isBlocked: false
     };
 
@@ -69,7 +69,7 @@ export class ATM {
       accountNumber: "ACC-100200",
       card: card1,
       balance: 3500.0,
-      pin: "1234"
+      pin: "0000"
     });
 
     this.accounts.set(card2.cardNumber, {

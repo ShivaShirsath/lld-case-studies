@@ -459,7 +459,7 @@ export const ATMDashboard: React.FC = () => {
                   value={cardNumberInput}
                   onChange={(e) => setCardNumberInput(e.target.value)}
                 >
-                  <option value="123456789">Shiva Ram (Card: 123456789 | PIN: 1234)</option>
+                  <option value="123456789">Shiva (Card: 9130057189 | PIN: 0000)</option>
                   <option value="987654321">Jane Doe (Card: 987654321 | PIN: 4321)</option>
                   <option value="555555555">Invalid Card (Unrecognized by bank)</option>
                 </select>

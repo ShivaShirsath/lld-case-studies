@@ -10,12 +10,12 @@ import { Armchair, CreditCard, Lock, Users, AlertTriangle } from "lucide-react";
  */
 export const MovieBookingDashboard: React.FC = () => {
   const [currentUser, setCurrentUser] = useState("user-1");
-  const [userName, setUserName] = useState("Shiva Ram");
+  const [userName, setUserName] = useState("Shiva");
   const [shows, setShows] = useState<Show[]>([]);
   const [selectedShowId, setSelectedShowId] = useState("");
   const [currentShow, setCurrentShow] = useState<Show | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  
+
   const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export const MovieBookingDashboard: React.FC = () => {
 
   const handleUserChange = (val: string) => {
     setCurrentUser(val);
-    const name = val === "user-1" ? "Shiva Ram" : "Alice Smith";
+    const name = val === "user-1" ? "Shiva" : "Alice Smith";
     setUserName(name);
     setSelectedSeats([]);
     addLog(`Switched simulator view to: ${name}.`, "info");
@@ -464,7 +464,7 @@ export const MovieBookingDashboard: React.FC = () => {
               value={currentUser}
               onChange={(e) => handleUserChange(e.target.value)}
             >
-              <option value="user-1">Customer A (Shiva Ram)</option>
+              <option value="user-1">Customer A (Shiva)</option>
               <option value="user-2">Customer B (Alice Smith)</option>
             </select>
           </div>
