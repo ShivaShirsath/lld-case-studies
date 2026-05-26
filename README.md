@@ -53,20 +53,45 @@ The project contains four completely independent, interactive LLD simulations ac
 - Node.js (version 18 or above recommended)
 - npm (installed with Node)
 
-### 1. Installation
-In the project root, run:
+---
+
+### Step 1: Install & Link Workspace Packages
+Install dependencies and configure local monorepo symlinks:
 ```bash
 npm install
 ```
-This automatically boots all dependencies and establishes symbolic workspace links between the applications and local packages.
 
-### 2. Start Development Servers
-Run both frontend and backend concurrently in development mode:
+### Step 2: Compile Shared Packages (Optional)
+Run TypeScript compilation on the shared packages to verify type correctness:
+```bash
+npm run build:types && npm run build:utils
+```
+
+### Step 3: Build the Entire Project
+Compile production bundles for both the backend and frontend:
+```bash
+npm run build
+```
+
+### Step 4: Run the Application
+
+#### A. Run in Development Mode (Concurrently with hot-reloading)
 ```bash
 npm run dev
 ```
-- **Frontend client** runs on: `http://localhost:5173`
-- **Backend API** runs on: `http://localhost:3000`
+Starts both the frontend client and backend API servers in parallel.
+- **Frontend client**: `http://localhost:5173`
+- **Backend API**: `http://localhost:3000`
+
+If you prefer to run them in separate terminal tabs:
+- **Backend only**: `npm run dev:backend`
+- **Frontend only**: `npm run dev:frontend`
+
+#### B. Run in Production Mode
+Ensure you have built the project (Step 3), then start the production API server:
+```bash
+npm run start:backend
+```
 
 ---
 
