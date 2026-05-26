@@ -10,6 +10,13 @@ The project contains four completely independent, interactive LLD simulations ac
 
 ---
 
+## 📽️ Interactive LLD Presentation
+
+A comprehensive design presentation detailing the system architecture, design decisions, pattern applications, and component interactions is available online:
+👉 **[View LLD Presentation on Gamma](https://gamma.app/docs/Untitled-ja00g5lm5d24l8f?mode=present#card-v057hlwpjl3vwk2)**
+
+---
+
 ## Technical Stack
 
 - **Frontend**: React (Strict Mode), TypeScript (Strict Mode), Vite, Lucide icons, styled with type-safe style objects (CJS styled-objects passed to the React `style` prop).
