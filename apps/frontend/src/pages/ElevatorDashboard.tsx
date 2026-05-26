@@ -3,6 +3,7 @@ import { theme } from "../styles/theme";
 import { LoggerPanel, LogEntry } from "../components/LoggerPanel";
 import { ElevatorSystemStatus, ElevatorDirection, ElevatorState } from "shared-types";
 import { ArrowUp, ArrowDown, Disc, CircleDot, Play } from "lucide-react";
+import { highlightTS } from "shared-utils";
 
 /**
  * ElevatorDashboard
@@ -15,6 +16,7 @@ export const ElevatorDashboard: React.FC = () => {
   const [selectedElevator, setSelectedElevator] = useState("elevator-1");
   const [cabinFloor, setCabinFloor] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [showCode, setShowCode] = useState(false);
 
   const prevStates = useRef<Record<string, { floor: number; state: ElevatorState }>>({});
 
@@ -302,6 +304,37 @@ export const ElevatorDashboard: React.FC = () => {
       display: "inline-flex",
       alignItems: "center",
       gap: "4px"
+    },
+    codePanel: {
+      backgroundColor: theme.colors.bgCardSolid,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "12px",
+      padding: "16px",
+      marginTop: "16px",
+      boxShadow: theme.shadows.sm
+    },
+    codeTitle: {
+      fontSize: "13px",
+      fontWeight: 700,
+      color: theme.colors.primaryLight,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      userSelect: "none" as const
+    },
+    codePre: {
+      backgroundColor: "#070b13",
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "8px",
+      padding: "12px",
+      fontFamily: "monospace, monospace",
+      fontSize: "11px",
+      color: theme.colors.textPrimary,
+      overflowX: "auto" as const,
+      whiteSpace: "pre-wrap" as const,
+      lineHeight: "1.5",
+      marginTop: "12px"
     }
   };
 
@@ -478,6 +511,55 @@ export const ElevatorDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        <div style={styles.codePanel}>
+          <div style={styles.codeTitle} onClick={() => setShowCode(!showCode)}>
+            <span>📂 LLD Code (State & LOOK Algorithm)</span>
+            <span>{showCode ? "▲" : "▼"}</span>
+          </div>
+          {showCode && (
+            <pre
+              style={styles.codePre}
+              dangerouslySetInnerHTML={{
+                __html: highlightTS(`// State Pattern for Cabin Movement States
+enum ElevatorState {
+  IDLE = "IDLE",
+  MOVING = "MOVING",
+  DOOR_OPEN = "DOOR_OPEN",
+  DOOR_CLOSING = "DOOR_CLOSING"
+}
+
+// LOOK Scheduling Algorithm (Cost heuristic)
+class LOOKScheduler implements ElevatorScheduler {
+  public assignRequest(elevators: ElevatorStatus[], request: ElevatorRequest): string {
+    // Choose elevator with minimal turnaround cost
+    return elevators.reduce((best, el) => {
+      return this.calculateCost(el, request) < this.calculateCost(best, request) ? el : best;
+    }).id;
+  }
+
+  private calculateCost(elevator: ElevatorStatus, request: ElevatorRequest): number {
+    const distance = Math.abs(elevator.currentFloor - request.floor);
+    if (elevator.direction === ElevatorDirection.IDLE) return distance;
+
+    const isUpAndBelow = (elevator.direction === UP && elevator.currentFloor <= request.floor);
+    const isDownAndAbove = (elevator.direction === DOWN && elevator.currentFloor >= request.floor);
+    const isAligned = (request.direction === elevator.direction);
+
+    if ((isUpAndBelow || isDownAndAbove) && isAligned) {
+      return distance; // pick up along the way
+    }
+
+    const turnaround = elevator.direction === UP 
+      ? Math.max(...elevator.targetFloors) 
+      : Math.min(...elevator.targetFloors);
+    return Math.abs(turnaround - elevator.currentFloor) + Math.abs(turnaround - request.floor);
+  }
+}`)
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

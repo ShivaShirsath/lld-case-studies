@@ -3,6 +3,7 @@ import { theme } from "../styles/theme";
 import { LoggerPanel, LogEntry } from "../components/LoggerPanel";
 import { Show, Booking, SeatStatus } from "shared-types";
 import { Armchair, CreditCard, Lock, Users, AlertTriangle } from "lucide-react";
+import { highlightTS } from "shared-utils";
 
 /**
  * MovieBookingDashboard
@@ -21,6 +22,7 @@ export const MovieBookingDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [showCode, setShowCode] = useState(false);
 
   const addLog = (message: string, type: "info" | "success" | "warning" | "error" = "info") => {
     const timestamp = new Date().toLocaleTimeString();
@@ -379,6 +381,37 @@ export const MovieBookingDashboard: React.FC = () => {
       gap: "6px",
       alignSelf: "center",
       margin: "8px 0"
+    },
+    codePanel: {
+      backgroundColor: theme.colors.bgCardSolid,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "12px",
+      padding: "16px",
+      marginTop: "16px",
+      boxShadow: theme.shadows.sm
+    },
+    codeTitle: {
+      fontSize: "13px",
+      fontWeight: 700,
+      color: theme.colors.primaryLight,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      userSelect: "none" as const
+    },
+    codePre: {
+      backgroundColor: "#070b13",
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "8px",
+      padding: "12px",
+      fontFamily: "monospace, monospace",
+      fontSize: "11px",
+      color: theme.colors.textPrimary,
+      overflowX: "auto" as const,
+      whiteSpace: "pre-wrap" as const,
+      lineHeight: "1.5",
+      marginTop: "12px"
     }
   };
 
@@ -541,6 +574,52 @@ export const MovieBookingDashboard: React.FC = () => {
             <span>{success}</span>
           </div>
         )}
+
+        <div style={styles.codePanel}>
+          <div style={styles.codeTitle} onClick={() => setShowCode(!showCode)}>
+            <span>📂 LLD Code (Hold Locking Control)</span>
+            <span>{showCode ? "▲" : "▼"}</span>
+          </div>
+          {showCode && (
+            <pre
+              style={styles.codePre}
+              dangerouslySetInnerHTML={{
+                __html: highlightTS(`// Concurrency Control: Seat hold registry with expiration
+class LockManager {
+  private readonly locks: Map<string, { userId: string; expiry: number }> = new Map();
+
+  public acquireLock(showId: string, seatId: string, userId: string, durationMs: number): boolean {
+    const key = \`\${showId}:\${seatId}\`;
+    const now = Date.now();
+    const existing = this.locks.get(key);
+
+    if (existing) {
+      if (existing.userId === userId) {
+        existing.expiry = now + durationMs; // extend
+        return true;
+      }
+      if (existing.expiry > now) return false; // locked by other
+    }
+
+    this.locks.set(key, { userId, expiry: now + durationMs });
+    return true;
+  }
+
+  public isLocked(showId: string, seatId: string, userId: string): boolean {
+    const key = \`\${showId}:\${seatId}\`;
+    const existing = this.locks.get(key);
+    if (!existing) return false;
+    if (existing.expiry <= Date.now()) {
+      this.locks.delete(key);
+      return false; // lock expired
+    }
+    return existing.userId !== userId;
+  }
+}`)
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

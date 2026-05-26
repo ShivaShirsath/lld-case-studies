@@ -3,6 +3,7 @@ import { theme } from "../styles/theme";
 import { LoggerPanel, LogEntry } from "../components/LoggerPanel";
 import { VehicleType, ParkingSlotType, ParkingFloor, Ticket } from "shared-types";
 import { Play, LogOut, Info, AlertTriangle } from "lucide-react";
+import { highlightTS } from "shared-utils";
 
 /**
  * ParkingLotDashboard
@@ -19,6 +20,7 @@ export const ParkingLotDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [showCode, setShowCode] = useState(false);
 
   const addLog = (message: string, type: "info" | "success" | "warning" | "error" = "info") => {
     const timestamp = new Date().toLocaleTimeString();
@@ -303,6 +305,37 @@ export const ParkingLotDashboard: React.FC = () => {
     receiptVal: {
       fontWeight: 600,
       color: theme.colors.textPrimary
+    },
+    codePanel: {
+      backgroundColor: theme.colors.bgCardSolid,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "12px",
+      padding: "16px",
+      marginTop: "16px",
+      boxShadow: theme.shadows.sm
+    },
+    codeTitle: {
+      fontSize: "13px",
+      fontWeight: 700,
+      color: theme.colors.primaryLight,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      userSelect: "none" as const
+    },
+    codePre: {
+      backgroundColor: "#070b13",
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "8px",
+      padding: "12px",
+      fontFamily: "monospace, monospace",
+      fontSize: "11px",
+      color: theme.colors.textPrimary,
+      overflowX: "auto" as const,
+      whiteSpace: "pre-wrap" as const,
+      lineHeight: "1.5",
+      marginTop: "12px"
     }
   };
 
@@ -472,6 +505,42 @@ export const ParkingLotDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        <div style={styles.codePanel}>
+          <div style={styles.codeTitle} onClick={() => setShowCode(!showCode)}>
+            <span>📂 LLD Code (Strategy Pattern)</span>
+            <span>{showCode ? "▲" : "▼"}</span>
+          </div>
+          {showCode && (
+            <pre
+              style={styles.codePre}
+              dangerouslySetInnerHTML={{
+                __html: highlightTS(`// Strategy Pattern for Slot Allocation
+interface ParkingStrategy {
+  findSlot(slots: ParkingSlot[], type: ParkingSlotType): ParkingSlot | null;
+}
+
+class NearestSlotStrategy implements ParkingStrategy {
+  public findSlot(slots: ParkingSlot[], type: ParkingSlotType): ParkingSlot | null {
+    // Finds first vacant slot matching the type
+    return slots.find(s => !s.isOccupied && s.type === type) || null;
+  }
+}
+
+// Composition Over Inheritance:
+// ParkingSlot holds reference to Vehicle instead of extending it.
+class ParkingSlot {
+  constructor(
+    public id: string,
+    public type: ParkingSlotType,
+    public isOccupied: boolean = false,
+    public currentVehicle: Vehicle | null = null
+  ) {}
+}`)
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

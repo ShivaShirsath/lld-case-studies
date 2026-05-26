@@ -3,6 +3,7 @@ import { theme } from "../styles/theme";
 import { LoggerPanel, LogEntry } from "../components/LoggerPanel";
 import { ATMStatus, ATMStateName, ATMTransaction } from "shared-types";
 import { Landmark, ArrowDownLeft, ArrowUpRight, ShieldCheck, KeyRound, AlertTriangle } from "lucide-react";
+import { highlightTS } from "shared-utils";
 
 /**
  * ATMDashboard
@@ -17,6 +18,7 @@ export const ATMDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [showCode, setShowCode] = useState(false);
 
   const addLog = (message: string, type: "info" | "success" | "warning" | "error" = "info") => {
     const timestamp = new Date().toLocaleTimeString();
@@ -372,6 +374,37 @@ export const ATMDashboard: React.FC = () => {
       color: theme.colors.textSecondary,
       borderBottom: "1px solid rgba(255,255,255,0.03)",
       padding: "8px 0"
+    },
+    codePanel: {
+      backgroundColor: theme.colors.bgCardSolid,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "12px",
+      padding: "16px",
+      marginTop: "16px",
+      boxShadow: theme.shadows.sm
+    },
+    codeTitle: {
+      fontSize: "13px",
+      fontWeight: 700,
+      color: theme.colors.primaryLight,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      userSelect: "none" as const
+    },
+    codePre: {
+      backgroundColor: "#070b13",
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "8px",
+      padding: "12px",
+      fontFamily: "monospace, monospace",
+      fontSize: "11px",
+      color: theme.colors.textPrimary,
+      overflowX: "auto" as const,
+      whiteSpace: "pre-wrap" as const,
+      lineHeight: "1.5",
+      marginTop: "12px"
     }
   };
 
@@ -605,6 +638,58 @@ export const ATMDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        <div style={styles.codePanel}>
+          <div style={styles.codeTitle} onClick={() => setShowCode(!showCode)}>
+            <span>📂 LLD Code (State & Chain Patterns)</span>
+            <span>{showCode ? "▲" : "▼"}</span>
+          </div>
+          {showCode && (
+            <pre
+              style={styles.codePre}
+              dangerouslySetInnerHTML={{
+                __html: highlightTS(`// State Pattern: ATM State delegation
+interface ATMState {
+  insertCard(atm: ATM, card: Card): void;
+  enterPin(atm: ATM, pin: string): void;
+  withdraw(atm: ATM, amount: number): void;
+}
+
+class PinVerifiedState implements ATMState {
+  public withdraw(atm: ATM, amount: number): void {
+    // 1. Check balances
+    // 2. Delegate bill splits to CashDispenser chain
+    const split = {};
+    const remainder = atm.getDispenserChain().dispense(amount, inventoryCopy, split);
+    if (remainder > 0) throw new InsufficientCashException();
+    // 3. Deduct balances and inventory
+  }
+}
+
+// Chain of Responsibility for Cash Dispenser
+class CashDispenser {
+  private nextDispenser: CashDispenser | null = null;
+  constructor(public readonly denomination: number) {}
+
+  public dispense(amount: number, inventory: Record<number, number>, result: Record<number, number>): number {
+    const available = inventory[this.denomination] || 0;
+    const needed = Math.floor(amount / this.denomination);
+    const bills = Math.min(available, needed);
+
+    if (bills > 0) {
+      result[this.denomination] = bills;
+      amount -= bills * this.denomination;
+    }
+    if (amount > 0 && this.nextDispenser) {
+      return this.nextDispenser.dispense(amount, inventory, result);
+    }
+    return amount;
+  }
+}`)
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
